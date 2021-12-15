@@ -1,9 +1,13 @@
 ﻿using Steamworks;
 using Steamworks.Data;
 using System;
+using System.Collections.Generic;
 using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace Steammersed
 {    
@@ -65,59 +69,44 @@ namespace Steammersed
             }
         }*/
 
-        private async Task<string> steamRequestAsync(String get, String post = null)
+        private async Task<string> steamRequestAsync(String get, Dictionary<String, String> post = null)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
 
             using (var client = new HttpClient())
             {
-                client.BaseAddress = new Uri("https://api.steampowered.com/" + get);
+                client.BaseAddress = new Uri("https://api.steampowered.com/");
                 client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-
-                //client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-                //client.DefaultRequestHeaders.Add("Accept-Language", "en-us");
                 client.DefaultRequestHeaders.Add("User-Agent", "Steam 1291812 / iPhone");
-
-                HttpResponseMessage response = await client.GetAsync("ISteamWebAPIUtil/GetSupportedAPIList/v0001/");
-                response.EnsureSuccessStatusCode();
-                return response.Content.ReadAsStringAsync().Result.ToString();
-
-
-
-                if (post != null)
+                if(post == null)
                 {
-                    client.DefaultRequestHeaders.Add("Accept-Encoding", "gzip, deflate");
-                    client.DefaultRequestHeaders.Add("Accept-Language", "en-us");
-                    client.DefaultRequestHeaders.Add("User-Agent", "Steam 1291812 / iPhone");
-
-                    //client.PostAsync()
-                    
-                    //byte[] postBytes = Encoding.ASCII.GetBytes(post);
-                    //request.ContentType = "application/x-www-form-urlencoded";
-                    //request.ContentLength = postBytes.Length;
-
-                    //Stream requestStream = request.GetRequestStream();
-                    //requestStream.Write(postBytes, 0, postBytes.Length);
-                    //requestStream.Close();
-
-                    //message++;
-                }
-
-                try
+                    HttpResponseMessage response = await client.GetAsync(get);
+                    response.EnsureSuccessStatusCode();
+                    return response.Content.ReadAsStringAsync().Result.ToString();
+                } 
+                else
                 {
-                    //HttpWebResponse responseBody = (HttpWebResponse)request.GetResponse();
-                    if ((int)response.StatusCode != 200) return null;
-
-                    //String src = new StreamReader(response.GetResponseStream()).ReadToEnd();
-                    //response.Close();
-                    //return src;
+                    var json = new StringContent(JsonConvert.SerializeObject(post), Encoding.UTF8, "application/json");
+                    HttpResponseMessage response = await client.PostAsync(get, json);
+                    response.EnsureSuccessStatusCode();
+                    return response.Content.ReadAsStringAsync().Result.ToString();
                 }
-                catch (WebException e)
-                {
-                    return null;
-                }
+                return "";
             }
+        }
+
+        public SteamApi.root ParseSupportedAPI()
+        {
+            var content = steamRequestAsync("ISteamWebAPIUtil/GetSupportedAPIList/v0001/").GetAwaiter().GetResult();
+            SteamApi.root r = null;
+            try
+            {
+                r = JsonConvert.DeserializeObject<SteamApi.root>(content);
+            } catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return r;
         }
 
         private DateTime unixTimestamp(long timestamp)
@@ -125,9 +114,5 @@ namespace Steammersed
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddSeconds(timestamp);
         }
-
-
-
-
     }
 }

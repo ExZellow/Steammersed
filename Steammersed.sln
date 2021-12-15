@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.0.31919.166
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.32002.261
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steammersed", "Steammersed\Steammersed.csproj", "{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Steammersed", "Steammersed\Steammersed.csproj", "{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamLibTest", "SteamLibTest\SteamLibTest.csproj", "{DEE05843-A0C5-431D-A222-E8B96EE7EEDC}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A} = {6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +20,10 @@ Global
 		{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BFEDC24-DA5F-4933-928E-AF3DEF5BEC9A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DEE05843-A0C5-431D-A222-E8B96EE7EEDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DEE05843-A0C5-431D-A222-E8B96EE7EEDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DEE05843-A0C5-431D-A222-E8B96EE7EEDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DEE05843-A0C5-431D-A222-E8B96EE7EEDC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
