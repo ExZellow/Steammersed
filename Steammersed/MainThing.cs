@@ -8,11 +8,42 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
 
 namespace Steammersed
 {    
     public class MainThing
     {
+
+        public bool Authenticate(String username, String password, String emailauthcode = "")
+        {
+
+            //How to use Steam Guard from mobile phone (not e-mail)??
+            String response = steamRequestAsync("ISteamOAuth2/GetTokenWithCredentials/v0001",
+                "client_id=DE45CD61&grant_type=password&username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password) + "&x_emailauthcode=" + emailauthcode + "&scope=read_profile%20write_profile%20read_client%20write_client");
+
+            if (response != null)
+            {
+                JObject data = Newtonsoft.Json.Linq.JObject.Parse(response);
+
+                if (data["access_token"] != null)
+                {
+                    accessToken = (String)data["access_token"];
+
+                    return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+                }
+                else if (((string)data["x_errorcode"]).Equals("steamguard_code_required"))
+                    return LoginStatus.SteamGuard;
+                else
+                    return LoginStatus.LoginFailed;
+            }
+            else
+            {
+                return LoginStatus.LoginFailed;
+            }
+        }
+
         /*
         public ServerInfo GetServerInfo()
         {
@@ -44,12 +75,13 @@ namespace Steammersed
         /*
         private bool login()
         {
-            String response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001",
-                "?access_token=" + accessToken);
+            //var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
+              //  "?access_token=" + "E3E5FDDA82E49614AA1D9F65F6C2A8E2");
 
-            if (response != null)
-            {
-                JObject data = JObject.Parse(response);
+            //if (response != null)
+            //{
+                var data = JObject.Parse("ISteamWebUserPresenceOAuth/Logon/v0001/",
+                "?access_token=E3E5FDDA82E49614AA1D9F65F6C2A8E2");
 
                 if (data["umqid"] != null)
                 {
@@ -62,14 +94,14 @@ namespace Steammersed
                 {
                     return false;
                 }
-            }
+            /*}
             else
             {
                 return false;
             }
         }*/
 
-        private async Task<string> steamRequestAsync(String get, Dictionary<String, String> post = null)
+        public static async Task<string> steamRequestAsync(String get, String post = null)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
 
@@ -91,13 +123,12 @@ namespace Steammersed
                     response.EnsureSuccessStatusCode();
                     return response.Content.ReadAsStringAsync().Result.ToString();
                 }
-                return "";
             }
         }
 
-        public SteamApi.root ParseSupportedAPI()
+        public SteamApi.root ParseSupportedAPI(String requested_interface, String api_key, String? steamid = "")
         {
-            var content = steamRequestAsync("ISteamWebAPIUtil/GetSupportedAPIList/v0001/").GetAwaiter().GetResult();
+            var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
             SteamApi.root r = null;
             try
             {
