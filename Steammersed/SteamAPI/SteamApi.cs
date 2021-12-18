@@ -20,7 +20,7 @@ namespace Steammersed
             public string name { get; set; }
             public int version { get; set; }
             public string httpmethod { get; set; }
-            public List<SteamMethodParam> parameters { get; set; }
+            public List<SteamMethodParameter> parameters { get; set; }
             public string description { get; set; }
         }
         public class SteamApiInterface
