@@ -53,6 +53,17 @@ namespace Steammersed
             public List<SteamApiInterface> interfaces { get; set; }
         }
 
+        public class SteamApiGameStat
+        {
+            public string steamID { get; set; }
+            public string gameName { get; set; }
+        }
+
+        public class SteamApiGameInfo
+        {
+            public List<SteamApiGameStat> playerstats { get; set; }
+        }
+
         public class root
         { 
             public SteamApiAppList apilist { get; set; }

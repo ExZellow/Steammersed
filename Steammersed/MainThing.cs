@@ -15,23 +15,48 @@ namespace Steammersed
 {    
     public class MainThing
     {
+        private string access_token;
+        private string umqid;
+        private string steamid;
+        private int message = 0;
 
-        public bool Authenticate(String username, String password, String emailauthcode = "")
+        public enum LoginStatus {
+            LoginSuccessful,
+            LoginFailed,
+            LoginCancelled,
+            SteamGuard
+        }
+
+        public LoginStatus Authenticate(string username, string password, string? emailauthcode = "")
         {
 
-            //How to use Steam Guard from mobile phone (not e-mail)??
-            String response = steamRequestAsync("ISteamOAuth2/GetTokenWithCredentials/v0001",
-                "client_id=DE45CD61&grant_type=password&username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password) + "&x_emailauthcode=" + emailauthcode + "&scope=read_profile%20write_profile%20read_client%20write_client");
+            //How to use Steam Guard from a mobile phone (not e-mail)??
+            var postDictionary = new Dictionary<string, string>();
+            postDictionary.Add("1", "client_id=DE45CD61" +
+                    "&grant_type=password&username=" + Uri.EscapeDataString(username) +
+                    "&password=" + Uri.EscapeDataString(password) +
+                    "&x_emailauthcode=" + emailauthcode +
+                    "&scope=read_profile%20write_profile%20read_client%20write_client");
+
+
+            var response = steamRequestAsync("ISteamUserOAuth/GetTokenWithCredentials/v0001", postDictionary);
 
             if (response != null)
             {
-                JObject data = Newtonsoft.Json.Linq.JObject.Parse(response);
+                JObject data = JObject.Parse(response.Result.ToString());
 
                 if (data["access_token"] != null)
                 {
-                    accessToken = (String)data["access_token"];
+                    access_token = data["access_token"].ToString();
+                    if (data["x_steamid"] != null)
+                    {
+                        steamid = data["x_steamid"].ToString();
 
-                    return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+
+                        return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+                    }
+                    else return LoginStatus.LoginFailed;
+
                 }
                 else if (((string)data["x_errorcode"]).Equals("steamguard_code_required"))
                     return LoginStatus.SteamGuard;
@@ -42,6 +67,12 @@ namespace Steammersed
             {
                 return LoginStatus.LoginFailed;
             }
+        }
+
+        public LoginStatus Authenticate(String accessToken)
+        {
+            this.access_token = accessToken;
+            return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
         }
 
         /*
@@ -72,16 +103,15 @@ namespace Steammersed
         }
         */
 
-        /*
+
         private bool login()
         {
-            //var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
-              //  "?access_token=" + "E3E5FDDA82E49614AA1D9F65F6C2A8E2");
+            var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
+                "?access_token=" + access_token);
 
-            //if (response != null)
-            //{
-                var data = JObject.Parse("ISteamWebUserPresenceOAuth/Logon/v0001/",
-                "?access_token=E3E5FDDA82E49614AA1D9F65F6C2A8E2");
+            if (response != null)
+            {
+                var data = JObject.Parse(response.Result.ToString());
 
                 if (data["umqid"] != null)
                 {
@@ -94,14 +124,14 @@ namespace Steammersed
                 {
                     return false;
                 }
-            /*}
+            }
             else
             {
                 return false;
             }
-        }*/
+        }
 
-        public static async Task<string> steamRequestAsync(String get, String post = null)
+        public static async Task<string> steamRequestAsync(String get, Dictionary<String, String> post = null)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
 
@@ -126,7 +156,7 @@ namespace Steammersed
             }
         }
 
-        public SteamApi.root ParseSupportedAPI(String requested_interface, String api_key, String? steamid = "")
+        public SteamApi.root ParseSupportedAPI(String requested_interface, String api_key, String? steamid)
         {
             var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
             SteamApi.root r = null;
@@ -140,10 +170,45 @@ namespace Steammersed
             return r;
         }
 
+        public SteamApi.SteamApiGameInfo ParseSupportedGameInfo(string app_id, string api_key, string steam_id)
+        {
+            var new_content = steamRequestAsync($"ISteamUserStats/GetUserStatsForGame/v2?appid={app_id}&key={api_key}&steamid={steam_id}").GetAwaiter().GetResult();
+            var content = steamRequestAsync("ISteamUserStats/GetUserStatsForGame/v0002/" + "?appid=" + app_id + "&key=" + api_key + "&steamid=" + steam_id).GetAwaiter().GetResult();
+            SteamApi.SteamApiGameInfo info = null;
+            try
+            {
+                info = JsonConvert.DeserializeObject<SteamApi.SteamApiGameInfo>(new_content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return info;
+        }
+        /*
+        public SteamApi.root GetGlobalStatsForGame(string app_id, string count, string stat_name)
+        {
+            var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
+            SteamApi.root r = null;
+            try
+            {
+                r = JsonConvert.DeserializeObject<SteamApi.root>(content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return r;
+        }
+        */
+
+
         private DateTime unixTimestamp(long timestamp)
         {
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddSeconds(timestamp);
         }
+
+
     }
 }
