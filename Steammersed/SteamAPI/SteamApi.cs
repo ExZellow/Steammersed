@@ -28,7 +28,7 @@ namespace Steammersed
     */
     public static class SteamApi
     {
-       public class SteamMethodParam
+       public class SteamMethodParameter
         {
             public string name { get; set; }
             public string type { get; set; }
@@ -40,7 +40,8 @@ namespace Steammersed
             public string name { get; set; }
             public int version { get; set; }
             public string httpmethod { get; set; }
-            public List<SteamMethodParam> parameters { get; set; }
+            public List<SteamMethodParameter> parameters { get; set; }
+            public string description { get; set; }
         }
         public class SteamApiInterface
         {
@@ -48,14 +49,25 @@ namespace Steammersed
             public List<SteamApiMethod> methods { get; set; }
         }
         
-        public class SteamApiAppList
+        public class SteamApiList
         {
             public List<SteamApiInterface> interfaces { get; set; }
         }
 
-        public class root
+        public class SteamApiGameStat
+        {
+            public string steamID { get; set; }
+            public string gameName { get; set; }
+        }
+
+        public class SteamApiGameInfo
+        {
+            public SteamApiGameStat playerstats { get; set; }
+        }
+
+        public class Root
         { 
-            public SteamApiAppList apilist { get; set; }
+            public SteamApiList apilist { get; set; }
         }
 
     }

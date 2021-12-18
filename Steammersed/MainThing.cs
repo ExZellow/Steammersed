@@ -16,7 +16,15 @@ namespace Steammersed
     public class MainThing
     {
 
-        public bool Authenticate(String username, String password, String emailauthcode = "")
+        /*
+        public enum LoginStatus {
+            LoginSuccessful,
+            LoginFailed,
+            LoginCancelled,
+            SteamGuard
+        }
+        
+        public LoginStatus Authenticate(string username, string password, string? emailauthcode = "")
         {
 
             //How to use Steam Guard from mobile phone (not e-mail)??
@@ -44,6 +52,12 @@ namespace Steammersed
             }
         }
 
+        public LoginStatus Authenticate(String accessToken)
+        {
+            this.access_token = accessToken;
+            return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+        }*/
+
         /*
         public ServerInfo GetServerInfo()
         {
@@ -70,9 +84,9 @@ namespace Steammersed
                 return null;
             }
         }
-        */
+        
 
-        /*
+
         private bool login()
         {
             //var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
@@ -101,7 +115,7 @@ namespace Steammersed
             }
         }*/
 
-        public static async Task<string> steamRequestAsync(String get, String post = null)
+        public static async Task<string> steamRequestAsync(string get, Dictionary<string, string> post = null)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
 
@@ -126,19 +140,51 @@ namespace Steammersed
             }
         }
 
-        public SteamApi.root ParseSupportedAPI(String requested_interface, String api_key, String? steamid = "")
+        public SteamApi.Root ParseSupportedAPI(string requested_interface, string api_key, string? steamid)
         {
             var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
-            SteamApi.root r = null;
+            SteamApi.Root r = null;
             try
             {
-                r = JsonConvert.DeserializeObject<SteamApi.root>(content);
+                r = JsonConvert.DeserializeObject<SteamApi.Root>(content);
             } catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
             return r;
         }
+
+        public SteamApi.SteamApiGameInfo ParseSupportedGameInfo(string app_id, string api_key, string steam_id)
+        {
+            var content = steamRequestAsync($"ISteamUserStats/GetUserStatsForGame/v2?appid={app_id}&key={api_key}&steamid={steam_id}").GetAwaiter().GetResult();
+            SteamApi.SteamApiGameInfo info = null;
+            try
+            {
+                info = JsonConvert.DeserializeObject<SteamApi.SteamApiGameInfo>(content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return info;
+        }
+        /*
+        public SteamApi.root GetGlobalStatsForGame(string app_id, string count, string stat_name)
+        {
+            var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
+            SteamApi.root r = null;
+            try
+            {
+                r = JsonConvert.DeserializeObject<SteamApi.root>(content);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+            return r;
+        }
+        */
+
 
         private DateTime unixTimestamp(long timestamp)
         {
