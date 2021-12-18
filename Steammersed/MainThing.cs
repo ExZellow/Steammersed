@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using SteamAuth;
 
 namespace Steammersed
 {    
@@ -103,7 +104,29 @@ namespace Steammersed
         }
         */
 
+        public bool logon(string username, string password)
+        { 
+            UserLogin login = new UserLogin(username, password);
+            LoginResult response = LoginResult.BadCredentials;
+            while ((response = login.DoLogin()) != LoginResult.LoginOkay)
+            {
+                switch (response)
+                {
+                    case LoginResult.NeedEmail:
+                        Console.WriteLine("Please enter your email code: ");
+                        string code = Console.ReadLine();
+                        login.EmailCode = code;
+                        break;
 
+                    case LoginResult.Need2FA:
+                        Console.WriteLine("2fa");
+                        code = Console.ReadLine();
+                        login.TwoFactorCode = code;
+                        break;
+                }
+            }
+            return true;
+        }
         private bool login()
         {
             var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +

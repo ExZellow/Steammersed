@@ -33,7 +33,7 @@ namespace SteamLibTest
             //{
                 Console.WriteLine(k.playerstats.gameName + " " + k.playerstats.steamID);
             //}
-
+            x.logon();
 
                 /*foreach (var current_interface in k.apilist)
                 {
