@@ -29,19 +29,33 @@ namespace Steammersed
         public LoginStatus Authenticate(string username, string password, string? emailauthcode = "")
         {
 
-            //How to use Steam Guard from mobile phone (not e-mail)??
-            String response = steamRequestAsync("ISteamOAuth2/GetTokenWithCredentials/v0001",
-                "client_id=DE45CD61&grant_type=password&username=" + Uri.EscapeDataString(username) + "&password=" + Uri.EscapeDataString(password) + "&x_emailauthcode=" + emailauthcode + "&scope=read_profile%20write_profile%20read_client%20write_client");
+            //How to use Steam Guard from a mobile phone (not e-mail)??
+            var postDictionary = new Dictionary<string, string>();
+            postDictionary.Add("1", "client_id=DE45CD61" +
+                    "&grant_type=password&username=" + Uri.EscapeDataString(username) +
+                    "&password=" + Uri.EscapeDataString(password) +
+                    "&x_emailauthcode=" + emailauthcode +
+                    "&scope=read_profile%20write_profile%20read_client%20write_client");
+
+
+            var response = steamRequestAsync("ISteamUserOAuth/GetTokenWithCredentials/v0001", postDictionary);
 
             if (response != null)
             {
-                JObject data = Newtonsoft.Json.Linq.JObject.Parse(response);
+                JObject data = JObject.Parse(response.Result.ToString());
 
                 if (data["access_token"] != null)
                 {
-                    accessToken = (String)data["access_token"];
+                    access_token = data["access_token"].ToString();
+                    if (data["x_steamid"] != null)
+                    {
+                        steamid = data["x_steamid"].ToString();
 
-                    return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+
+                        return login() ? LoginStatus.LoginSuccessful : LoginStatus.LoginFailed;
+                    }
+                    else return LoginStatus.LoginFailed;
+
                 }
                 else if (((string)data["x_errorcode"]).Equals("steamguard_code_required"))
                     return LoginStatus.SteamGuard;
@@ -91,13 +105,12 @@ namespace Steammersed
         
         private bool login()
         {
-            //var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
-              //  "?access_token=" + "E3E5FDDA82E49614AA1D9F65F6C2A8E2");
+            var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
+                "?access_token=" + access_token);
 
-            //if (response != null)
-            //{
-                var data = JObject.Parse("ISteamWebUserPresenceOAuth/Logon/v0001/",
-                "?access_token=E3E5FDDA82E49614AA1D9F65F6C2A8E2");
+            if (response != null)
+            {
+                var data = JObject.Parse(response.Result.ToString());
 
                 if (data["umqid"] != null)
                 {
@@ -110,12 +123,12 @@ namespace Steammersed
                 {
                     return false;
                 }
-            /*}
+            }
             else
             {
                 return false;
             }
-        }*/
+        }
 
         public bool logon(string username, string password)
         { 
@@ -227,5 +240,7 @@ namespace Steammersed
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);
             return origin.AddSeconds(timestamp);
         }
+
+
     }
 }
