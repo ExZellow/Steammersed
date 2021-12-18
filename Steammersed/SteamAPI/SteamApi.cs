@@ -6,26 +6,6 @@ using System.Threading.Tasks;
 
 namespace Steammersed
 {
-    /*
-     * following json format for GetSupportedAPIList
-    "applist" : 
-    {
-        "interfaces": [
-          {
-            "name": "IClientStats_1046930,
-            "methods": [
-             {
-                "name": "ReportEvent",
-                "version":1,
-                "httpmethod":"POST",
-                "parameters":[]
-             } 
-            ]
-          },
-          {interface},
-        ]
-    }
-    */
     public static class SteamApi
     {
        public class SteamMethodParameter
@@ -40,7 +20,7 @@ namespace Steammersed
             public string name { get; set; }
             public int version { get; set; }
             public string httpmethod { get; set; }
-            public List<SteamMethodParameter> parameters { get; set; }
+            public List<SteamMethodParam> parameters { get; set; }
             public string description { get; set; }
         }
         public class SteamApiInterface
@@ -62,10 +42,10 @@ namespace Steammersed
 
         public class SteamApiGameInfo
         {
-            public SteamApiGameStat playerstats { get; set; }
+            public SteamApiGameStat playerstats { get; set; }    
         }
-
-        public class Root
+        
+        public class RootSteamApiList
         { 
             public SteamApiList apilist { get; set; }
         }

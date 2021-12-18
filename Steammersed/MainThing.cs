@@ -1,6 +1,4 @@
-﻿using Steamworks;
-using Steamworks.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
@@ -15,7 +13,10 @@ namespace Steammersed
 {    
     public class MainThing
     {
-
+        private string access_token;
+        private string umqid;
+        private string steamid;
+        private int message = 0;
         /*
         public enum LoginStatus {
             LoginSuccessful,
@@ -23,7 +24,7 @@ namespace Steammersed
             LoginCancelled,
             SteamGuard
         }
-        
+
         public LoginStatus Authenticate(string username, string password, string? emailauthcode = "")
         {
 
@@ -86,7 +87,7 @@ namespace Steammersed
         }
         
 
-
+        
         private bool login()
         {
             //var response = steamRequestAsync("ISteamWebUserPresenceOAuth/Logon/v0001/" +
@@ -115,7 +116,37 @@ namespace Steammersed
             }
         }*/
 
-        public static async Task<string> steamRequestAsync(string get, Dictionary<string, string> post = null)
+        public bool logon(string username, string password)
+        { 
+            UserLogin login = new UserLogin(username, password);
+            LoginResult response = LoginResult.BadCredentials;
+            string code = "";
+            Console.WriteLine("Start");
+            while ((response = login.DoLogin()) != LoginResult.LoginOkay)
+            {
+                switch (response)
+                {
+                    case LoginResult.NeedEmail:
+                        Console.WriteLine("Please enter your email code: ");
+                        code = Console.ReadLine();
+                        login.EmailCode = code;
+                        break;
+
+                    case LoginResult.Need2FA:
+                        Console.WriteLine("2fa");
+                        code = Console.ReadLine();
+                        login.TwoFactorCode = code;
+                        break;
+
+                    default:
+                        Console.WriteLine("Smth bad happened");
+                        break;
+                }
+            }
+            return true;
+        }
+
+        public static async Task<string> steamRequestAsync(String get, String post = null)
         {
             System.Net.ServicePointManager.Expect100Continue = false;
 
@@ -140,33 +171,37 @@ namespace Steammersed
             }
         }
 
-        public SteamApi.Root ParseSupportedAPI(string requested_interface, string api_key, string? steamid)
+        public T DeserializeObject<T>(string request_result)
         {
-            var content = steamRequestAsync(requested_interface + api_key + "&steamid=" + steamid).GetAwaiter().GetResult();
-            SteamApi.Root r = null;
+            T result = default(T);
             try
             {
-                r = JsonConvert.DeserializeObject<SteamApi.Root>(content);
+                result = JsonConvert.DeserializeObject<T>(request_result);
             } catch(Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
-            return r;
+            
+            return result;
         }
 
-        public SteamApi.SteamApiGameInfo ParseSupportedGameInfo(string app_id, string api_key, string steam_id)
+        public SteamApi.RootSteamApiList ParseSupportedAPI(string requested_interface, string api_key, string? steamid)
         {
-            var content = steamRequestAsync($"ISteamUserStats/GetUserStatsForGame/v2?appid={app_id}&key={api_key}&steamid={steam_id}").GetAwaiter().GetResult();
-            SteamApi.SteamApiGameInfo info = null;
-            try
-            {
-                info = JsonConvert.DeserializeObject<SteamApi.SteamApiGameInfo>(content);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            return info;
+            var request_result = steamRequestAsync($"{requested_interface}/?access_token={api_key}&steamid={steamid}").GetAwaiter().GetResult();
+            return DeserializeObject<SteamApi.RootSteamApiList>(request_result);
+            
+        }
+
+        public SteamApi.SteamApiGameInfo ParseSupportedGameInfo(string requested_interface, string app_id, string api_key, string steam_id)
+        {
+            var request_result = steamRequestAsync($"{requested_interface}/?appid={app_id}&key={api_key}&steamid={steam_id}").GetAwaiter().GetResult();
+            return DeserializeObject<SteamApi.SteamApiGameInfo>(request_result);
+        }
+
+        public SteamApi.SteamApiMethod ParseAPIMethod(string requested_interface, string api_key)
+        {
+            var request_result = steamRequestAsync(requested_interface).GetAwaiter().GetResult();
+            return DeserializeObject<SteamApi.SteamApiMethod>(request_result);
         }
         /*
         public SteamApi.root GetGlobalStatsForGame(string app_id, string count, string stat_name)
