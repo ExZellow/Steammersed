@@ -173,7 +173,7 @@ namespace Steammersed
         public SteamApi.SteamApiGameInfo ParseSupportedGameInfo(string app_id, string api_key, string steam_id)
         {
             var new_content = steamRequestAsync($"ISteamUserStats/GetUserStatsForGame/v2?appid={app_id}&key={api_key}&steamid={steam_id}").GetAwaiter().GetResult();
-            var content = steamRequestAsync("ISteamUserStats/GetUserStatsForGame/v0002/" + "?appid=" + app_id + "&key=" + api_key + "&steamid=" + steam_id).GetAwaiter().GetResult();
+            //var content = steamRequestAsync("ISteamUserStats/GetUserStatsForGame/v0002/" + "?appid=" + app_id + "&key=" + api_key + "&steamid=" + steam_id).GetAwaiter().GetResult();
             SteamApi.SteamApiGameInfo info = null;
             try
             {

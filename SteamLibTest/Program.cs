@@ -25,12 +25,14 @@ namespace SteamLibTest
             //Console.WriteLine(loginStatus);
 
             //var k = x.ParseSupportedAPI(requested_interface, api_key, steamid);
-            var k = x.ParseSupportedGameInfo(app_id, api_key, steam_id);
+            var k = x.ParseSupportedGameInfo(app_id,
+                                             api_key,
+                                             steam_id);
 
-            foreach (var current_info in k.playerstats)
-            {
-                Console.WriteLine(current_info.gameName + " " + current_info.steamID);
-            }
+            //foreach (var current_info in k.playerstats)
+            //{
+                Console.WriteLine(k.playerstats.gameName + " " + k.playerstats.steamID);
+            //}
 
 
                 /*foreach (var current_interface in k.apilist)

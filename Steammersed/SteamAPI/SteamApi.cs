@@ -61,9 +61,18 @@ namespace Steammersed
 
         public class SteamApiGameInfo
         {
-            public List<SteamApiGameStat> playerstats { get; set; }
+            public SteamApiGameStat playerstats { get; set; }
+            //public List<SteamApiGameStat> playerstats { get; set; } <--- ONLY when "playerstats":[{...}]
         }
-
+        //when we have "json":{...} its a class member called "json" and we must declare it as
+        //class root { public SomeClassName json {get;set;} }
+        //with contents in {...}
+        //when we have "json":[] then its an array(so [{}] array of objects(classes)), makes sense, right?
+        //in that case you should use List<SomeTypeName> json {get;set;}
+        //when we have "json":"val" it's literraly a string, you can create class for it.
+        //line above also true for boolean and number variables
+        
+        //Good luck!
         public class root
         { 
             public SteamApiAppList apilist { get; set; }
