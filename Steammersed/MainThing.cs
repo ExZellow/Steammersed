@@ -131,6 +131,11 @@ namespace Steammersed
             return DeserializeObject<SteamApi.SteamApiMethod>(request_result);
         }
 
+        public SteamApi.RootSteamApp ParseAppList(string requested_interface, string api_key)
+        {
+            var request_result = steamRequestAsync($"{requested_interface}?key={api_key}").GetAwaiter().GetResult();
+            return DeserializeObject<SteamApi.RootSteamApp>(request_result);
+        }
         private DateTime unixTimestamp(long timestamp)
         {
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0);

@@ -50,5 +50,21 @@ namespace Steammersed
             public SteamApiList apilist { get; set; }
         }
 
+        public class SteamApp
+        {
+            public string appid { get; set; }
+            public string name { get; set; }
+        }
+
+        public class SteamAppList
+        {
+            public List<SteamApp> apps { get; set; }
+        }
+
+        public class RootSteamApp
+        {
+            public SteamAppList applist { get; set; }
+        }
+
     }
 }
