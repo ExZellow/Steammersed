@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="13.0.1" />
-    <PackageReference Include="SteamAuth" Version="3.0.0" />
   </ItemGroup>
 
 </Project>

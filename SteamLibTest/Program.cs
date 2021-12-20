@@ -16,19 +16,22 @@ namespace SteamLibTest
 
             var requested_interface =
             //"IPlayerService/GetOwnedGames/v0001/?access_token=";
-            //"ISteamWebAPIUtil/GetSupportedAPIList/v0001";
+            "ISteamWebAPIUtil/GetSupportedAPIList/v0001";
             //"ISteamUserStats/GetGlobalStatsForGame/v0001";
             //"ISteamUserStats/GetUserStatsForGame/v2";
             //"IClientStats_1046930/ReportEvent/v1";
-            "ISteamApps/GetAppList/v2";
+            //"ISteamApps/GetAppList/v2";
 
 
             //process_data.logon("devienlein", "Qytwer1100");
-
-            GetAppList(requested_interface, api_key);
-                
-            
-
+            var k = new SISteamUserStats(api_key);
+            var kk = new SIPlayerService(api_key);
+            var xx = kk.GetSteamLevel(76561198329187801).GetAwaiter().GetResult();
+            var kek = k.GetUserStatsForGameAsync(76561198329187801, 730).GetAwaiter().GetResult();
+            // var k = new SISteamUser(api_key);
+            //var kek = k.GetSteamFriendsWithSummaryAsync(76561198329187801).GetAwaiter().GetResult();//k.GetSteamFriendsAsync(76561198329187801).GetAwaiter().GetResult();
+            //var kek = process_data.Test().GetAwaiter().GetResult();
+            var x = 10;
 
         }
 
